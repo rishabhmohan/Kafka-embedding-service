@@ -1,0 +1,52 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: producer
+  namespace: rm-embeddings
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: producer
+  template:
+    metadata:
+      labels:
+        app: producer
+    spec:
+      containers:
+      - name: producer
+        image: producer:test
+        volumeMounts:
+        - mountPath: /watched
+          name: watched-vol
+      volumes:
+      - name: watched-vol
+        persistentVolumeClaim:
+          claimName: watched-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: consumer
+  namespace: rm-embeddings
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: consumer
+  template:
+    metadata:
+      labels:
+        app: consumer
+    spec:
+      containers:
+      - name: consumer
+        image: consumer:test
+        volumeMounts:
+        - mountPath: /rm-embeddings
+          name: rm-embeddings-vol
+      volumes:
+      - name: rm-embeddings-vol
+        persistentVolumeClaim:
+          claimName: rm-embeddings-pvc
